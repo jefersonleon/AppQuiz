@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Sistema de Quiz AEE</title>
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .form-container {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            max-width: 450px;
+            width: 100%;
+        }
+        .form-container h2 {
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 1.8rem;
+            text-align: center;
+        }
+        .form-group { margin-bottom: 20px; }
+        .form-group label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        .btn-primary {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+        .btn-primary:hover {
+            transform: scale(1.02);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        .form-link {
+            text-align: center;
+            margin-top: 25px;
+            color: #555;
+        }
+        .form-link a {
+            color: #667eea;
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .form-link a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h2>🎓 Login no Sistema AEE</h2>
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" placeholder="seu@email.com" required>
+        </div>
+        <div class="form-group">
+            <label for="senha">Senha</label>
+            <input type="password" id="senha" placeholder="••••••••" required>
+        </div>
+        <button class="btn-primary" onclick="handleLogin()">Entrar</button>
+        <p class="form-link">
+            Não tem conta? <a href="cadastro.html">Cadastre-se</a>
+        </p>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    
+    <script>
+        // COLE SUA CONFIGURAÇÃO DO FIREBASE AQUI
+     const firebaseConfig = {
+            apiKey: "AIzaSyAKKaP8m7oVKSCvIk0mV_CQH8xog5x3UMs",
+            authDomain: "quizaee-59472.firebaseapp.com",
+            projectId: "quizaee-59472",
+            storageBucket: "quizaee-59472.firebasestorage.app",
+            messagingSenderId: "26379620347",
+            appId: "1:26379620347:web:dd20953fa71aa228a8c55e"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+
+        // Verifica se o usuário já está logado para pular esta tela
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                window.location.href = 'dash.html';
+            }
+        });
+
+        function handleLogin() {
+            const email = document.getElementById('email').value;
+            const senha = document.getElementById('senha').value;
+            const button = document.querySelector('.btn-primary');
+
+            if (!email || !senha) {
+                alert("Por favor, preencha email e senha.");
+                return;
+            }
+
+            button.disabled = true;
+            button.textContent = 'Entrando...';
+
+            auth.signInWithEmailAndPassword(email, senha)
+                .then((userCredential) => {
+                    window.location.href = 'dash.html';
+                })
+                .catch((error) => {
+                    alert("Erro ao logar: " + error.message);
+                    button.disabled = false;
+                    button.textContent = 'Entrar';
+                });
+        }
+    </script>
+</body>
+</html>
