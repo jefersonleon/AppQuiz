@@ -502,40 +502,29 @@
                 document.querySelectorAll('.view').forEach(view => { view.classList.remove('active'); }); 
             },
 
-           async displayResponses() {
-            if (this.state.userData.tipo !== 'ADM') { 
-                document.getElementById('responsesContainer').style.display = 'none'; 
-                return; 
-            }
-            document.getElementById('responsesContainer').style.display = 'block';
-            const container = document.getElementById('responsesContainer');
-            
-            // --- INÍCIO DO BLOCO DE DIAGNÓSTICO ---
-            try {
-                const querySnapshot = await db.collection('respostas').orderBy('timestamp', 'desc').orderBy('time', 'desc').get();
-                
+            async displayAllResponses() {
+                document.getElementById('responsesContainer').style.display = 'block';
+                const container = document.getElementById('responsesContainer');
+                const querySnapshot = await db.collection('respostas').get();
                 this.state.allResponses = [];
-                querySnapshot.forEach(doc => { this.state.allResponses.push({ id: doc.id, ...doc.data() }); });
-                
-                if (this.state.allResponses.length === 0) { 
-                    container.innerHTML = '<p style="text-align:center; color:white; margin-top: 30px;">Nenhuma resposta coletada ainda.</p>'; 
-                    return; 
+                querySnapshot.forEach(doc => {
+                    this.state.allResponses.push({ id: doc.id, ...doc.data() });
+                });
+
+                if (this.state.allResponses.length === 0) {
+                    container.innerHTML = '<p style="text-align:center; color:white; margin-top: 30px;">Nenhuma resposta coletada ainda.</p>';
+                    return;
                 }
-                
-                let html = `<div class="results-container"><div class="results-header"><h3>📊 Respostas Coletadas (${this.state.allResponses.length})</h3><button class="btn-chart" onclick="app.showOverallCharts()">Ver Gráficos Gerais</button></div>`;
-                
+
+                let html = `<div class="results-container"><div class="results-header"><h3>📊 Respostas Coletadas (${this.state.allResponses.length})</h3><button class="btn-chart" onclick="app.showOverallCharts()">Ver Gráficos</button></div>`;
+
                 this.state.allResponses.forEach(response => {
                     const quiz = quizzes[response.type]; if (!quiz) return;
                     const totalQuestionsMult = quiz.sections.reduce((acc, s) => acc + s.questions.length, 0);
                     const positiveCount = response.responses.slice(0, totalQuestionsMult).filter(r => r === 'Sempre' || r === 'Sim').length;
                     const percentage = totalQuestionsMult > 0 ? Math.round((positiveCount / totalQuestionsMult) * 100) : 0;
-                    
-                    let respondentName = response.respondentInfo.nome || response.usuario_nome;
-                    if (response.respondentInfo.aluno) {
-                        respondentName += ` (Aluno: ${response.respondentInfo.aluno})`;
-                    }
-                    
-                    html += `<div class="response-item"><div><p><strong>${response.type.toUpperCase()}</strong> - ${percentage}%</p><p style="font-size: 0.9rem; color: #666;">${respondentName}</p><p style="font-size: 0.85rem; color: #999;">${response.timestamp} às ${response.time || ''}</p></div><div class="response-actions"><button class="btn-small btn-download" onclick="app.downloadSingleReport('${response.id}')">⬇️ Baixar</button><button class="btn-small btn-delete" onclick="app.deleteResponse('${response.id}')">🗑️ Deletar</button></div></div>`;
+
+                    html += `<div class="response-item"><div><p><strong>${response.type.toUpperCase()}</strong> - ${percentage}%</p><p style="font-size: 0.9rem; color: #666;">${response.respondentInfo.nome || response.usuario_nome}</p><p style="font-size: 0.85rem; color: #999;">${response.timestamp}</p></div><div class="response-actions"><button class="btn-small btn-download" onclick="app.downloadSingleReport('${response.id}')">⬇️ Baixar</button><button class="btn-small btn-delete" onclick="app.deleteResponse('${response.id}')">🗑️ Deletar</button></div></div>`;
                 });
                 container.innerHTML = html + `</div>`;
 
