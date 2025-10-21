@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Sistema AEE</title>
+    <title>Cadastro - Sistema de Quiz AEE</title>
+    
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -36,15 +37,16 @@
             font-weight: 600;
             margin-bottom: 8px;
         }
-        .form-group input {
+        .form-group input, .form-group select {
             width: 100%;
             padding: 12px 15px;
             border: 2px solid #e5e7eb;
             border-radius: 8px;
             font-size: 1rem;
             transition: all 0.3s ease;
+            background-color: white;
         }
-        .form-group input:focus {
+        .form-group input:focus, .form-group select:focus {
             outline: none;
             border-color: #667eea;
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
@@ -66,10 +68,6 @@
             transform: scale(1.02);
             box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
         }
-        .btn-primary:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
         .form-link {
             text-align: center;
             margin-top: 25px;
@@ -85,65 +83,97 @@
 </head>
 <body>
     <div class="form-container">
-        <h2>🎓 Login no Sistema AEE</h2>
+        <h2>Criar Nova Conta</h2>
+        <div class="form-group">
+            <label for="nome">Nome Completo</label>
+            <input type="text" id="nome" placeholder="Seu nome" required>
+        </div>
         <div class="form-group">
             <label for="email">Email</label>
             <input type="email" id="email" placeholder="seu@email.com" required>
         </div>
         <div class="form-group">
             <label for="senha">Senha</label>
-            <input type="password" id="senha" placeholder="••••••••" required>
+            <input type="password" id="senha" placeholder="Mínimo 6 caracteres" required>
         </div>
-        <button class="btn-primary" id="loginBtn" onclick="handleLogin()">Entrar</button>
+        <div class="form-group">
+            <label for="tipo">Eu sou:</label>
+            <select id="tipo">
+                <option value="familia">Família</option>
+                <option value="professor">Professor</option>
+                <option value="aee">Atendente AEE</option>
+            </select>
+        </div>
+        <button class="btn-primary" onclick="handleRegister()">Cadastrar</button>
         <p class="form-link">
-            Não tem conta? <a href="cadastro.html">Cadastre-se</a>
+            Já tem conta? <a href="index.html">Faça login</a>
         </p>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-    
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
     <script>
+        // COLE SUA CONFIGURAÇÃO DO FIREBASE AQUI
         const firebaseConfig = {
-            apiKey: "AIzaSyAKKaP8m7oVKSCvIk0mV_CQH8xog5x3UMs",
-            authDomain: "quizaee-59472.firebaseapp.com",
-            projectId: "quizaee-59472",
-            storageBucket: "quizaee-59472.firebasestorage.app",
-            messagingSenderId: "26379620347",
-            appId: "1:26379620347:web:dd20953fa71aa228a8c55e"
-        };
+  apiKey: "AIzaSyAKKaP8m7oVKSCvIk0mV_CQH8xog5x3UMs",
+  authDomain: "quizaee-59472.firebaseapp.com",
+  databaseURL: "https://quizaee-59472-default-rtdb.firebaseio.com",
+  projectId: "quizaee-59472",
+  storageBucket: "quizaee-59472.firebasestorage.app",
+  messagingSenderId: "26379620347",
+  appId: "1:26379620347:web:dd20953fa71aa228a8c55e"
+};
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
+        const db = firebase.firestore();
 
-        auth.onAuthStateChanged(user => {
-            if (user) {
-                window.location.href = 'dash.html';
-            }
+       // EM: cadastro.html, dentro do <script>
+
+function handleRegister() {
+    const nome = document.getElementById('nome').value;
+    const email = document.getElementById('email').value;
+    const senha = document.getElementById('senha').value;
+    const tipo = document.getElementById('tipo').value;
+
+    // --- NOVA LINHA ---
+    const button = document.querySelector('.btn-primary');
+    // -----------------
+
+    if (!nome || !email || !senha) {
+        alert("Por favor, preencha todos os campos.");
+        return;
+    }
+
+    // --- NOVAS LINHAS (Feedback visual) ---
+    button.disabled = true;
+    button.textContent = 'Cadastrando...';
+    // ------------------------------------
+
+    auth.createUserWithEmailAndPassword(email, senha)
+        .then((userCredential) => {
+            const uid = userCredential.user.uid;
+            // Salva os dados extras no Firestore
+            return db.collection('usuarios').doc(uid).set({
+                nome: nome,
+                email: email,
+                tipo: tipo
+            });
+        })
+        .then(() => {
+            // Cadastro e salvamento OK, redireciona para o dashboard
+            window.location.href = 'dash.html';
+        })
+        .catch((error) => {
+            alert("Erro ao cadastrar: " + error.message);
+            
+            // --- NOVAS LINHAS (Reabilita o botão em caso de erro) ---
+            button.disabled = false;
+            button.textContent = 'Cadastrar';
+            // -----------------------------------------------------
         });
-
-        function handleLogin() {
-            const email = document.getElementById('email').value;
-            const senha = document.getElementById('senha').value;
-            const button = document.getElementById('loginBtn');
-
-            if (!email || !senha) {
-                alert("Por favor, preencha email e senha.");
-                return;
-            }
-
-            button.disabled = true;
-            button.textContent = 'Entrando...';
-
-            auth.signInWithEmailAndPassword(email, senha)
-                .then(() => {
-                    window.location.href = 'dash.html';
-                })
-                .catch((error) => {
-                    alert("Erro ao logar: " + error.message);
-                    button.disabled = false;
-                    button.textContent = 'Entrar';
-                });
-        }
+}
     </script>
 </body>
 </html>
