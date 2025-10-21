@@ -397,7 +397,6 @@
                     this.state.currentQuestion++; this.displayQuestion();
                 }
             },
-
             showOpenQuestions() {
                 const quiz = quizzes[this.state.currentQuiz];
                 if (!quiz.openQuestions || quiz.openQuestions.length === 0) { this.finishQuiz(); return; }
