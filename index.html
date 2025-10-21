@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Sistema AEE</title>
+    <title>Login - Sistema de Quiz AEE</title>
+    
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -66,10 +67,6 @@
             transform: scale(1.02);
             box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
         }
-        .btn-primary:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
         .form-link {
             text-align: center;
             margin-top: 25px;
@@ -94,7 +91,7 @@
             <label for="senha">Senha</label>
             <input type="password" id="senha" placeholder="••••••••" required>
         </div>
-        <button class="btn-primary" id="loginBtn" onclick="handleLogin()">Entrar</button>
+        <button class="btn-primary" onclick="handleLogin()">Entrar</button>
         <p class="form-link">
             Não tem conta? <a href="cadastro.html">Cadastre-se</a>
         </p>
@@ -104,7 +101,8 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     
     <script>
-        const firebaseConfig = {
+        // COLE SUA CONFIGURAÇÃO DO FIREBASE AQUI
+     const firebaseConfig = {
             apiKey: "AIzaSyAKKaP8m7oVKSCvIk0mV_CQH8xog5x3UMs",
             authDomain: "quizaee-59472.firebaseapp.com",
             projectId: "quizaee-59472",
@@ -115,6 +113,7 @@
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
 
+        // Verifica se o usuário já está logado para pular esta tela
         auth.onAuthStateChanged(user => {
             if (user) {
                 window.location.href = 'dash.html';
@@ -124,7 +123,7 @@
         function handleLogin() {
             const email = document.getElementById('email').value;
             const senha = document.getElementById('senha').value;
-            const button = document.getElementById('loginBtn');
+            const button = document.querySelector('.btn-primary');
 
             if (!email || !senha) {
                 alert("Por favor, preencha email e senha.");
@@ -135,7 +134,7 @@
             button.textContent = 'Entrando...';
 
             auth.signInWithEmailAndPassword(email, senha)
-                .then(() => {
+                .then((userCredential) => {
                     window.location.href = 'dash.html';
                 })
                 .catch((error) => {
