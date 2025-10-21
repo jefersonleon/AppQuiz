@@ -263,10 +263,6 @@
                 auth.signOut().then(() => { window.location.href = 'index.html'; }); 
             },
 
-            // ================================================================
-            // FUNÇÃO REATORADA - setupDashboardView
-            // Aplica as novas regras de visualização para cada tipo de usuário.
-            // ================================================================
             async setupDashboardView() {
                 this.hideAllViews();
                 document.getElementById('menuView').classList.add('active');
@@ -276,61 +272,47 @@
                 const cardProfessor = document.getElementById('card-professor');
                 const grid = document.getElementById('quiz-grid');
                 
-                // 1. Limpa o grid de qualquer mensagem de "Obrigado"
                 grid.innerHTML = ''; 
                 
-                // 2. Re-adiciona os cards (Isso preserva os 'onclick')
                 grid.appendChild(cardAEE);
                 grid.appendChild(cardFamilia);
                 grid.appendChild(cardProfessor);
                 
-                // 3. Reseta os estilos
                 cardAEE.style.display = 'block';
                 cardFamilia.style.display = 'block';
                 cardProfessor.style.display = 'block';
-                grid.style.gridTemplateColumns = ''; // Reseta para o padrão do CSS
+                grid.style.gridTemplateColumns = ''; 
 
                 const tipo = this.state.userData.tipo;
 
                 if (tipo === 'ADM') {
-                    // **REGRA ADM**: Mostra tudo (cards e resultados) e carrega os resultados
                     document.getElementById('responsesContainer').style.display = 'block';
                     this.displayResponses();
                 } else {
-                    // USUÁRIO COMUM: Esconde os resultados
                     document.getElementById('responsesContainer').style.display = 'none';
                     
-                    // Esconde todos os cards para começar
                     cardAEE.style.display = 'none';
                     cardFamilia.style.display = 'none';
                     cardProfessor.style.display = 'none';
 
                     if (tipo === 'familia') {
-                        // **REGRA FAMÍLIA**: Verifica se já respondeu (doc.id == uid)
                         const respostaDoc = await db.collection('respostas').doc(this.state.uid).get();
                         
                         if (respostaDoc.exists) {
-                            // Se já respondeu, mostra mensagem de "Obrigado"
                             grid.innerHTML = `<div class="results-card" style="grid-column: 1 / -1;"><h2>Obrigado por participar!</h2><p>Você já enviou suas respostas.</p></div>`;
                         } else {
-                            // Se não respondeu, mostra APENAS o card da família
                             cardFamilia.style.display = 'block';
-                            grid.style.gridTemplateColumns = '1fr'; // Centraliza o card
+                            grid.style.gridTemplateColumns = '1fr'; 
                         }
                     } else if (tipo === 'professor') {
-                        // **REGRA PROFESSOR**: Mostra o card, pode responder livremente
                         cardProfessor.style.display = 'block';
-                        grid.style.gridTemplateColumns = '1fr'; // Centraliza o card
+                        grid.style.gridTemplateColumns = '1fr'; 
                     } else if (tipo === 'aee') {
-                        // **REGRA AEE**: Mostra o card, pode responder livremente
                         cardAEE.style.display = 'block';
-                        grid.style.gridTemplateColumns = '1fr'; // Centraliza o card
+                        grid.style.gridTemplateColumns = '1fr'; 
                     }
                 }
             },
-            // ================================================================
-            // FIM DA FUNÇÃO REATORADA
-            // ================================================================
 
             startQuiz(quizType) {
                 if (this.state.userData.tipo !== 'ADM' && this.state.userData.tipo !== quizType) {
@@ -397,6 +379,7 @@
                     this.state.currentQuestion++; this.displayQuestion();
                 }
             },
+            
             showOpenQuestions() {
                 const quiz = quizzes[this.state.currentQuiz];
                 if (!quiz.openQuestions || quiz.openQuestions.length === 0) { this.finishQuiz(); return; }
@@ -422,12 +405,7 @@
                 } else { this.showOpenQuestions(); }
             },
 
-            // ================================================================
-            // FUNÇÃO REATORADA - finishQuiz
-            // Aplica as novas regras de salvamento para cada tipo de usuário.
-            // ================================================================
             async finishQuiz() {
-                // Monta o objeto de resposta
                 const responseData = { 
                     type: this.state.currentQuiz, 
                     title: quizzes[this.state.currentQuiz].title, 
@@ -440,29 +418,17 @@
                     usuario_tipo: this.state.userData.tipo 
                 };
                 
-                // Salva os dados para a tela de resultado/download imediato
                 this.state.lastReportData = responseData;
 
                 try {
                     if (this.state.userData.tipo === 'familia') {
-                        // **REGRA FAMÍLIA**: Salva usando o UID como ID do documento.
-                        // Isso garante que a família só possa responder UMA VEZ,
-                        // pois a próxima tentativa irá sobrescrever (set) esta.
                         await db.collection('respostas').doc(this.state.uid).set(responseData);
-                        
-                        // Adiciona o ID ao 'lastReportData' para o download funcionar
                         this.state.lastReportData.id = this.state.uid;
                     } else {
-                        // **REGRA ADM, PROFESSOR, AEE**: Salva com um ID automático.
-                        // Isso permite que eles respondam VÁRIAS VEZES,
-                        // pois cada resposta será um novo documento.
                         const docRef = await db.collection('respostas').add(responseData);
-
-                        // Adiciona o ID gerado ao 'lastReportData' para o download funcionar
                         this.state.lastReportData.id = docRef.id;
                     }
                     
-                    // Mostra a tela de sucesso
                     this.showResultsView(responseData);
 
                 } catch (error) {
@@ -470,9 +436,6 @@
                     console.error("Erro ao salvar no Firestore: ", error);
                 }
             },
-            // ================================================================
-            // FIM DA FUNÇÃO REATORADA
-            // ================================================================
 
             showResultsView(responseData) {
                 this.hideAllViews(); document.getElementById('resultsView').classList.add('active');
@@ -489,7 +452,6 @@
             },
 
             downloadReport() { 
-                // A função generateReport agora precisa do .id que foi adicionado em finishQuiz
                 this.generateReport(this.state.lastReportData); 
             },
 
@@ -501,40 +463,58 @@
                 document.querySelectorAll('.view').forEach(view => { view.classList.remove('active'); }); 
             },
 
-            async displayAllResponses() {
+            // ================================================================
+            // FUNÇÃO displayResponses (CORRIGIDA)
+            // Função com nome correto e 'try/catch' na posição correta
+            // ================================================================
+            async displayResponses() {
+                if (this.state.userData.tipo !== 'ADM') { 
+                    document.getElementById('responsesContainer').style.display = 'none'; 
+                    return; 
+                }
                 document.getElementById('responsesContainer').style.display = 'block';
                 const container = document.getElementById('responsesContainer');
-                const querySnapshot = await db.collection('respostas').get();
-                this.state.allResponses = [];
-                querySnapshot.forEach(doc => {
-                    this.state.allResponses.push({ id: doc.id, ...doc.data() });
-                });
+                
+                // --- INÍCIO DO BLOCO DE DIAGNÓSTICO ---
+                try {
+                    const querySnapshot = await db.collection('respostas').orderBy('timestamp', 'desc').orderBy('time', 'desc').get();
+                    
+                    this.state.allResponses = [];
+                    querySnapshot.forEach(doc => { this.state.allResponses.push({ id: doc.id, ...doc.data() }); });
+                    
+                    if (this.state.allResponses.length === 0) { 
+                        container.innerHTML = '<p style="text-align:center; color:white; margin-top: 30px;">Nenhuma resposta coletada ainda.</p>'; 
+                        return; 
+                    }
+                    
+                    let html = `<div class="results-container"><div class="results-header"><h3>📊 Respostas Coletadas (${this.state.allResponses.length})</h3><button class="btn-chart" onclick="app.showOverallCharts()">Ver Gráficos Gerais</button></div>`;
+                    
+                    this.state.allResponses.forEach(response => {
+                        const quiz = quizzes[response.type]; if (!quiz) return;
+                        const totalQuestionsMult = quiz.sections.reduce((acc, s) => acc + s.questions.length, 0);
+                        const positiveCount = response.responses.slice(0, totalQuestionsMult).filter(r => r === 'Sempre' || r === 'Sim').length;
+                        const percentage = totalQuestionsMult > 0 ? Math.round((positiveCount / totalQuestionsMult) * 100) : 0;
+                        
+                        let respondentName = response.respondentInfo.nome || response.usuario_nome;
+                        if (response.respondentInfo.aluno) {
+                            respondentName += ` (Aluno: ${response.respondentInfo.aluno})`;
+                        }
+                        
+                        html += `<div class="response-item"><div><p><strong>${response.type.toUpperCase()}</strong> - ${percentage}%</p><p style="font-size: 0.9rem; color: #666;">${respondentName}</p><p style="font-size: 0.85rem; color: #999;">${response.timestamp} às ${response.time || ''}</p></div><div class="response-actions"><button class="btn-small btn-download" onclick="app.downloadSingleReport('${response.id}')">⬇️ Baixar</button><button class="btn-small btn-delete" onclick="app.deleteResponse('${response.id}')">🗑️ Deletar</button></div></div>`;
+                    });
+                    container.innerHTML = html + `</div>`;
 
-                if (this.state.allResponses.length === 0) {
-                    container.innerHTML = '<p style="text-align:center; color:white; margin-top: 30px;">Nenhuma resposta coletada ainda.</p>';
-                    return;
+                } catch (error) {
+                    // SE AS REGRAS FALHAREM, ESTE ALERTA VAI APARECER!
+                    alert("ERRO DE DIAGNÓSTICO (ADM): Não foi possível carregar as respostas. Verifique as regras do Firestore. Erro: " + error.message);
+                    console.error("Erro ao buscar respostas (ADM):", error);
+                    container.innerHTML = `<p style="text-align:center; color:yellow; margin-top: 30px;">Erro ao carregar respostas: ${error.message}</p>`;
                 }
-
-                let html = `<div class="results-container"><div class="results-header"><h3>📊 Respostas Coletadas (${this.state.allResponses.length})</h3><button class="btn-chart" onclick="app.showOverallCharts()">Ver Gráficos</button></div>`;
-
-                this.state.allResponses.forEach(response => {
-                    const quiz = quizzes[response.type]; if (!quiz) return;
-                    const totalQuestionsMult = quiz.sections.reduce((acc, s) => acc + s.questions.length, 0);
-                    const positiveCount = response.responses.slice(0, totalQuestionsMult).filter(r => r === 'Sempre' || r === 'Sim').length;
-                    const percentage = totalQuestionsMult > 0 ? Math.round((positiveCount / totalQuestionsMult) * 100) : 0;
-
-                    html += `<div class="response-item"><div><p><strong>${response.type.toUpperCase()}</strong> - ${percentage}%</p><p style="font-size: 0.9rem; color: #666;">${response.respondentInfo.nome || response.usuario_nome}</p><p style="font-size: 0.85rem; color: #999;">${response.timestamp}</p></div><div class="response-actions"><button class="btn-small btn-download" onclick="app.downloadSingleReport('${response.id}')">⬇️ Baixar</button><button class="btn-small btn-delete" onclick="app.deleteResponse('${response.id}')">🗑️ Deletar</button></div></div>`;
-                });
-                container.innerHTML = html + `</div>`;
-
-            } catch (error) {
-                // SE AS REGRAS FALHAREM, ESTE ALERTA VAI APARECER!
-                alert("ERRO DE DIAGNÓSTICO (ADM): Não foi possível carregar as respostas. Verifique as regras do Firestore. Erro: " + error.message);
-                console.error("Erro ao buscar respostas (ADM):", error);
-                container.innerHTML = `<p style="text-align:center; color:yellow; margin-top: 30px;">Erro ao carregar respostas: ${error.message}</p>`;
-            }
-            // --- FIM DO BLOCO DE DIAGNÓSTICO ---
-        },
+                // --- FIM DO BLOCO DE DIAGNÓSTICO ---
+            },
+            // ================================================================
+            // FIM DA FUNÇÃO CORRIGIDA
+            // ================================================================
 
             downloadSingleReport(id) { 
                 const response = this.state.allResponses.find(r => r.id === id); 
@@ -565,7 +545,6 @@
                 const blob = new Blob([report], { type: 'text/plain;charset=utf-8' });
                 const url = URL.createObjectURL(blob); const element = document.createElement('a');
                 element.href = url; 
-                // Usa o ID do documento para garantir um nome de arquivo único
                 element.download = `relatorio_aee_${response.id || 'recente'}.txt`;
                 document.body.appendChild(element); element.click(); document.body.removeChild(element); URL.revokeObjectURL(url);
             },
@@ -575,7 +554,6 @@
                     try {
                         await db.collection('respostas').doc(id).delete();
                         alert("Resposta deletada com sucesso."); 
-                        // Recarrega a lista de respostas
                         this.displayResponses();
                     } catch (error) { alert("Erro ao deletar: " + error.message); }
                 }
