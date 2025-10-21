@@ -477,7 +477,7 @@
                 
                 // --- INÍCIO DO BLOCO DE DIAGNÓSTICO ---
                 try {
-                    const querySnapshot = await db.collection('respostas').orderBy('timestamp', 'desc').orderBy('time', 'desc').get();
+                    const querySnapshot = await db.collection('respostas').get();
                     
                     this.state.allResponses = [];
                     querySnapshot.forEach(doc => { this.state.allResponses.push({ id: doc.id, ...doc.data() }); });
