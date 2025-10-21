@@ -3,8 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema AEE</title>
+    <title>Sistema de Quiz AEE com Gráficos</title>
+    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
@@ -18,29 +20,31 @@
         .header { text-align: center; color: white; margin-bottom: 40px; position: relative; }
         .header h1 { font-size: 2.5rem; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
         .header p { font-size: 1.1rem; opacity: 0.9; }
-        .header .btn-logout { position: absolute; top: 0; right: 0; background: rgba(255,255,255,0.2); color: white; border: 2px solid white; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-weight: 600; transition: all 0.3s ease; }
-        .header .btn-logout:hover { background: rgba(255,255,255,0.4); }
-        
-        .alert-info { background: #dbeafe; color: #1e40af; padding: 15px 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #3b82f6; }
-        
+        .header .btn-logout {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .header .btn-logout:hover { background: rgba(255, 255, 255, 0.4); }
         .quiz-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 40px; }
         .quiz-card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); cursor: pointer; transition: all 0.3s ease; border-left: 5px solid #667eea; text-align: center; }
-        .quiz-card:hover { transform: translateY(-5px); box-shadow: 0 15px 40px rgba(0,0,0,0.3); }
+        .quiz-card:hover { transform: translateY(-5px); box-shadow: 0 15px 40px rgba(0,0,0,0.3); border-left-color: #764ba2; }
         .quiz-card h2 { font-size: 1.5rem; color: #333; margin-bottom: 15px; }
         .quiz-card p { color: #666; margin-bottom: 20px; min-height: 50px; }
         .quiz-card button { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 12px 30px; border-radius: 25px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; width: 100%; }
         .quiz-card button:hover { transform: scale(1.05); box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4); }
-        .quiz-card button:disabled { opacity: 0.6; cursor: not-allowed; background: #999; }
-        
-        .my-responses { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); margin-top: 30px; }
-        .my-responses h3 { color: #333; margin-bottom: 20px; }
-        .response-item { background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #667eea; }
-        .response-item p { color: #555; margin: 5px 0; }
-        
         .form-container { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); max-width: 500px; margin: 0 auto; }
         .form-container h2 { color: #333; margin-bottom: 30px; font-size: 1.8rem; }
         .form-group { margin-bottom: 20px; }
-        .form-group label { display: block; color: #333; font-weight: 600; margin-bottom: 8px; }
+        .form-group label { display: block; color: #333; font-weight: 600; margin-bottom: 8px; font-size: 0.95rem; }
         .form-group input { width: 100%; padding: 12px 15px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem; transition: all 0.3s ease; }
         .form-group input:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); }
         .button-group { display: flex; gap: 10px; margin-top: 30px; }
@@ -48,60 +52,57 @@
         .btn-primary:hover { transform: scale(1.02); box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4); }
         .btn-secondary { flex: 1; background: #e5e7eb; color: #333; border: none; padding: 15px; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; }
         .btn-secondary:hover { background: #d1d5db; }
-        
         .quiz-container { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
         .progress-bar { width: 100%; height: 8px; background: #e5e7eb; border-radius: 10px; margin-bottom: 30px; overflow: hidden; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); transition: width 0.3s ease; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); transition: width 0.3s ease; border-radius: 10px; }
         .question-header { margin-bottom: 20px; }
         .question-number { color: #667eea; font-weight: 600; font-size: 0.9rem; margin-bottom: 10px; }
-        .section-title { color: #666; font-size: 0.95rem; font-weight: 500; }
+        .section-title { color: #666; font-size: 0.95rem; font-weight: 500; margin-bottom: 5px; }
         .question-text { font-size: 1.3rem; color: #333; font-weight: 600; margin-bottom: 30px; line-height: 1.5; }
-        .options-container { display: grid; gap: 12px; }
+        .options-container { display: grid; gap: 12px; margin-bottom: 30px; }
         .option-btn { padding: 15px 20px; border: 2px solid #e5e7eb; background: #f9fafb; border-radius: 10px; cursor: pointer; font-size: 1rem; transition: all 0.3s ease; text-align: left; font-weight: 500; color: #333; }
         .option-btn:hover { border-color: #667eea; background: #f0f4ff; transform: translateX(5px); }
         .open-question { margin: 30px 0; padding: 20px; background: #f9fafb; border-radius: 10px; border-left: 4px solid #667eea; }
         .open-question textarea { width: 100%; padding: 12px 15px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem; font-family: inherit; resize: vertical; min-height: 100px; transition: all 0.3s ease; }
         .open-question textarea:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); }
-        
         .results-card { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); text-align: center; }
         .results-card h2 { font-size: 2rem; color: #333; margin-bottom: 20px; }
         .percentage-display { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px; border-radius: 15px; margin: 30px 0; font-size: 3rem; font-weight: 700; }
         .parecer-box { background: #f0f4ff; padding: 20px; border-radius: 10px; border-left: 5px solid #667eea; margin: 30px 0; text-align: left; }
         .parecer-box h3 { color: #667eea; margin-bottom: 10px; }
         .parecer-box p { color: #555; line-height: 1.6; }
-        
         .btn-back { color: white; background: rgba(255,255,255,0.2); border: 2px solid white; padding: 10px 20px; border-radius: 25px; cursor: pointer; margin-bottom: 30px; font-weight: 600; transition: all 0.3s ease; }
         .btn-back:hover { background: rgba(255,255,255,0.3); }
-        
-        .results-container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); margin-top: 40px; }
+        .results-container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); margin-bottom: 30px; margin-top: 40px; }
         .results-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .results-header h3 { color: #333; font-size: 1.3rem; }
+        .results-header h3 { color: #333; font-size: 1.3rem; margin: 0; }
         .btn-chart { background: #10b981; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: background 0.3s ease; }
         .btn-chart:hover { background: #059669; }
+        .response-item { background: #f8f9fa; padding: 15px; border-radius: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #667eea; }
+        .response-item p { color: #555; margin: 5px 0; }
+        .response-actions { display: flex; gap: 10px; margin-left: 20px; }
         .btn-small { padding: 8px 15px; border: none; border-radius: 8px; cursor: pointer; font-size: 0.9rem; transition: all 0.3s ease; }
         .btn-download { background: #10b981; color: white; }
         .btn-download:hover { background: #059669; }
         .btn-delete { background: #ef4444; color: white; }
         .btn-delete:hover { background: #dc2626; }
-        .response-actions { display: flex; gap: 10px; margin-left: 20px; }
-        
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.6); padding-top: 60px; }
         .modal-content { background-color: #fefefe; margin: 5% auto; padding: 30px; border: 1px solid #888; width: 80%; max-width: 900px; border-radius: 15px; position: relative; }
         .close-btn { color: #aaa; position: absolute; top: 15px; right: 25px; font-size: 28px; font-weight: bold; cursor: pointer; }
-        .close-btn:hover { color: black; }
+        .close-btn:hover, .close-btn:focus { color: black; text-decoration: none; cursor: pointer; }
         .chart-container { margin-bottom: 40px; }
         .chart-container h4 { text-align: center; margin-bottom: 15px; color: #333; font-size: 1.2rem; }
-        
         @media (max-width: 768px) {
             .header h1 { font-size: 1.8rem; }
+            .header .btn-logout { top: -10px; right: -10px; padding: 6px 12px; }
             .quiz-grid { grid-template-columns: 1fr; }
+            .quiz-container, .form-container, .results-card { padding: 20px; }
             .percentage-display { font-size: 2rem; }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- MENU VIEW -->
         <div class="view active" id="menuView">
             <div class="header">
                 <h1>🎓 Sistema de Quiz AEE</h1>
@@ -109,26 +110,27 @@
                 <button class="btn-logout" onclick="app.logout()">Sair</button>
             </div>
 
-            <div id="alertContainer"></div>
-
-            <div class="quiz-grid" id="quizGrid">
-                <div class="quiz-card">
-                    <h2>📋</h2>
-                    <h2 id="quizTitle">Quiz</h2>
-                    <p id="quizDesc">Questionário de avaliação</p>
-                    <button id="startBtn" onclick="app.startQuiz()">Iniciar Quiz</button>
+            <div class="quiz-grid" id="quiz-grid">
+                <div class="quiz-card" id="card-aee">
+                    <h2>👨‍🏫</h2><h2>AEE</h2>
+                    <p>Autoavaliação Reflexiva sobre o Atendimento</p>
+                    <button onclick="app.startQuiz('aee')">Iniciar</button>
+                </div>
+                <div class="quiz-card" id="card-familia">
+                    <h2>👨‍👩‍👧</h2><h2>Família</h2>
+                    <p>Questionário para as Famílias</p>
+                    <button onclick="app.startQuiz('familia')">Iniciar</button>
+                </div>
+                <div class="quiz-card" id="card-professor">
+                    <h2>📚</h2><h2>Professores</h2>
+                    <p>Questionário para os Professores</p>
+                    <button onclick="app.startQuiz('professor')">Iniciar</button>
                 </div>
             </div>
-
-            <div id="myResponsesContainer" style="display: none;" class="my-responses">
-                <h3>Minhas Respostas Anteriores</h3>
-                <div id="myResponsesList"></div>
-            </div>
-
+            
             <div id="responsesContainer"></div>
         </div>
 
-        <!-- FORM VIEW -->
         <div class="view" id="formView">
             <button class="btn-back" onclick="app.backToMenu()">← Voltar</button>
             <div class="form-container">
@@ -141,7 +143,6 @@
             </div>
         </div>
 
-        <!-- QUIZ VIEW -->
         <div class="view" id="quizView">
             <button class="btn-back" onclick="app.backToMenu()">← Voltar</button>
             <div class="quiz-container">
@@ -155,7 +156,6 @@
             </div>
         </div>
 
-        <!-- RESULTS VIEW -->
         <div class="view" id="resultsView">
             <button class="btn-back" onclick="app.backToMenu()">← Voltar</button>
             <div class="results-card">
@@ -167,7 +167,7 @@
                 </div>
                 <div class="button-group">
                     <button class="btn-primary" onclick="app.downloadReport()">⬇️ Baixar Relatório</button>
-                    <button class="btn-secondary" onclick="app.backToMenu()">Voltar</button>
+                    <button class="btn-secondary" onclick="app.backToMenu()">Voltar ao Início</button>
                 </div>
             </div>
         </div>
@@ -183,20 +183,23 @@
         </div>
     </div>
 
+
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyAKKaP8m7oVKSCvIk0mV_CQH8xog5x3UMs",
-            authDomain: "quizaee-59472.firebaseapp.com",
-            databaseURL: "https://quizaee-59472-default-rtdb.firebaseio.com",
-            projectId: "quizaee-59472",
-            storageBucket: "quizaee-59472.firebasestorage.app",
-            messagingSenderId: "26379620347",
-            appId: "1:26379620347:web:dd20953fa71aa228a8c55e"
-        };
+        // 1. COLE SUA CONFIGURAÇÃO DO FIREBASE AQUI
+      const firebaseConfig = {
+ apiKey: "AIzaSyAKKaP8m7oVKSCvIk0mV_CQH8xog5x3UMs",
+ authDomain: "quizaee-59472.firebaseapp.com",
+ databaseURL: "https://quizaee-59472-default-rtdb.firebaseio.com",
+ projectId: "quizaee-59472",
+ storageBucket: "quizaee-59472.firebasestorage.app",
+ messagingSenderId: "26379620347",
+ appId: "1:26379620347:web:dd20953fa71aa228a8c55e"
+};
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
 
+        // 2. O OBJETO 'quizzes'
         const quizzes = {
             aee: {
                 title: 'Autoavaliação Reflexiva sobre o Atendimento no AEE',
@@ -221,118 +224,125 @@
             }
         };
 
+        // 3. O OBJETO 'app' (Com a lógica refatorada)
         const app = {
             state: {
-                currentUser: null, userData: null, currentQuiz: null,
-                currentSection: 0, currentQuestion: 0, responses: [],
-                respondentInfo: {}, lastReportData: null, allResponses: [],
-                myResponses: [], chartInstances: {}
+                currentUser: null, userData: null, uid: null,
+                currentQuiz: null, currentSection: 0, currentQuestion: 0,
+                responses: [], respondentInfo: {}, lastReportData: null,
+                allResponses: [], chartInstances: {}
             },
 
             init() {
                 auth.onAuthStateChanged(async (user) => {
-                    if (!user) {
+                    if (user) {
+                        const uid = user.uid;
+                        const userDoc = await db.collection('usuarios').doc(uid).get();
+
+                        if (!userDoc.exists) {
+                            alert("ERRO DE DADOS: Seu usuário foi autenticado, mas não encontramos seus dados (nome, tipo) no banco. Por favor, cadastre-se novamente ou contate o suporte."); 
+                            auth.signOut(); 
+                            return;
+                        }
+
+                        this.state.currentUser = user;
+                        this.state.uid = uid;
+                        this.state.userData = userDoc.data();
+                        
+                        document.getElementById('welcomeMessage').textContent = `Bem-vindo(a), ${this.state.userData.nome}!`;
+                        
+                        this.setupDashboardView();
+
+                    } else {
                         window.location.href = 'index.html';
-                        return;
                     }
-
-                    const userDoc = await db.collection('usuarios').doc(user.uid).get();
-                    if (!userDoc.exists) {
-                        alert("Erro: Dados do usuário não encontrados.");
-                        auth.signOut();
-                        return;
-                    }
-
-                    this.state.currentUser = user;
-                    this.state.userData = userDoc.data();
-                    
-                    document.getElementById('welcomeMessage').textContent = `Bem-vindo(a), ${this.state.userData.nome}!`;
-                    
-                    await this.loadMyResponses();
-                    this.setupDashboard();
                 });
             },
 
-            async loadMyResponses() {
-                const snapshot = await db.collection('respostas')
-                    .where('usuario_uid', '==', this.state.currentUser.uid)
-                    .orderBy('timestamp', 'desc')
-                    .get();
-
-                this.state.myResponses = [];
-                snapshot.forEach(doc => {
-                    this.state.myResponses.push({ id: doc.id, ...doc.data() });
-                });
+            logout() { 
+                auth.signOut().then(() => { window.location.href = 'index.html'; }); 
             },
 
-            setupDashboard() {
+            // ================================================================
+            // FUNÇÃO REATORADA - setupDashboardView
+            // Aplica as novas regras de visualização para cada tipo de usuário.
+            // ================================================================
+            async setupDashboardView() {
+                this.hideAllViews();
+                document.getElementById('menuView').classList.add('active');
+                
+                const cardAEE = document.getElementById('card-aee');
+                const cardFamilia = document.getElementById('card-familia');
+                const cardProfessor = document.getElementById('card-professor');
+                const grid = document.getElementById('quiz-grid');
+                
+                // 1. Limpa o grid de qualquer mensagem de "Obrigado"
+                grid.innerHTML = ''; 
+                
+                // 2. Re-adiciona os cards (Isso preserva os 'onclick')
+                grid.appendChild(cardAEE);
+                grid.appendChild(cardFamilia);
+                grid.appendChild(cardProfessor);
+                
+                // 3. Reseta os estilos
+                cardAEE.style.display = 'block';
+                cardFamilia.style.display = 'block';
+                cardProfessor.style.display = 'block';
+                grid.style.gridTemplateColumns = ''; // Reseta para o padrão do CSS
+
                 const tipo = this.state.userData.tipo;
-                const alertContainer = document.getElementById('alertContainer');
-                const startBtn = document.getElementById('startBtn');
-                const myResponsesContainer = document.getElementById('myResponsesContainer');
 
                 if (tipo === 'ADM') {
-                    document.getElementById('quizGrid').style.display = 'none';
-                    myResponsesContainer.style.display = 'none';
-                    this.displayAllResponses();
-                    return;
-                }
-
-                this.state.currentQuiz = tipo;
-                const quiz = quizzes[tipo];
-                document.getElementById('quizTitle').textContent = quiz.title;
-                document.getElementById('quizDesc').textContent = quiz.title;
-
-                if (tipo === 'familia' && this.state.myResponses.length > 0) {
-                    startBtn.disabled = true;
-                    startBtn.textContent = 'Quiz Já Respondido';
-                    alertContainer.innerHTML = '<div class="alert-info">ℹ️ <strong>Famílias podem responder apenas uma vez.</strong> Você já respondeu este questionário.</div>';
-                } else if (tipo === 'professor' || tipo === 'aee') {
-                    alertContainer.innerHTML = `<div class="alert-info">ℹ️ Você pode responder múltiplas vezes. ${tipo === 'professor' ? 'Responda para cada aluno.' : 'Avalie periodicamente sua prática.'}</div>`;
-                }
-
-                if (this.state.myResponses.length > 0) {
-                    myResponsesContainer.style.display = 'block';
-                    this.displayMyResponses();
-                }
-            },
-
-            displayMyResponses() {
-                let html = '';
-                this.state.myResponses.forEach((resp, idx) => {
-                    const quiz = quizzes[resp.type];
-                    const totalMult = quiz.sections.reduce((acc, s) => acc + s.questions.length, 0);
-                    const positives = resp.responses.slice(0, totalMult).filter(r => r === 'Sempre' || r === 'Sim').length;
-                    const percentage = Math.round((positives / totalMult) * 100);
+                    // **REGRA ADM**: Mostra tudo (cards e resultados) e carrega os resultados
+                    document.getElementById('responsesContainer').style.display = 'block';
+                    this.displayResponses();
+                } else {
+                    // USUÁRIO COMUM: Esconde os resultados
+                    document.getElementById('responsesContainer').style.display = 'none';
                     
-                    html += `
-                        <div class="response-item">
-                            <p><strong>Resposta #${this.state.myResponses.length - idx}</strong></p>
-                            <p>Desempenho: <strong style="color: #667eea;">${percentage}%</strong></p>
-                            <p style="font-size: 0.85rem; color: #999;">${resp.timestamp} às ${resp.time}</p>
-                        </div>
-                    `;
-                });
-                document.getElementById('myResponsesList').innerHTML = html;
-            },
+                    // Esconde todos os cards para começar
+                    cardAEE.style.display = 'none';
+                    cardFamilia.style.display = 'none';
+                    cardProfessor.style.display = 'none';
 
-            startQuiz() {
-                if (this.state.userData.tipo === 'familia' && this.state.myResponses.length > 0) {
-                    alert('Você já respondeu este questionário! Famílias podem responder apenas uma vez.');
-                    return;
+                    if (tipo === 'familia') {
+                        // **REGRA FAMÍLIA**: Verifica se já respondeu (doc.id == uid)
+                        const respostaDoc = await db.collection('respostas').doc(this.state.uid).get();
+                        
+                        if (respostaDoc.exists) {
+                            // Se já respondeu, mostra mensagem de "Obrigado"
+                            grid.innerHTML = `<div class="results-card" style="grid-column: 1 / -1;"><h2>Obrigado por participar!</h2><p>Você já enviou suas respostas.</p></div>`;
+                        } else {
+                            // Se não respondeu, mostra APENAS o card da família
+                            cardFamilia.style.display = 'block';
+                            grid.style.gridTemplateColumns = '1fr'; // Centraliza o card
+                        }
+                    } else if (tipo === 'professor') {
+                        // **REGRA PROFESSOR**: Mostra o card, pode responder livremente
+                        cardProfessor.style.display = 'block';
+                        grid.style.gridTemplateColumns = '1fr'; // Centraliza o card
+                    } else if (tipo === 'aee') {
+                        // **REGRA AEE**: Mostra o card, pode responder livremente
+                        cardAEE.style.display = 'block';
+                        grid.style.gridTemplateColumns = '1fr'; // Centraliza o card
+                    }
                 }
-                this.state.currentSection = 0;
-                this.state.currentQuestion = 0;
-                this.state.responses = [];
-                this.state.respondentInfo = {};
+            },
+            // ================================================================
+            // FIM DA FUNÇÃO REATORADA
+            // ================================================================
+
+            startQuiz(quizType) {
+                if (this.state.userData.tipo !== 'ADM' && this.state.userData.tipo !== quizType) {
+                    alert("Você só pode responder o quiz do seu tipo de perfil."); return;
+                }
+                this.state.currentQuiz = quizType; this.state.currentSection = 0; this.state.currentQuestion = 0; this.state.responses = []; this.state.respondentInfo = {};
                 this.showFormView();
             },
 
             showFormView() {
-                this.hideAllViews();
-                document.getElementById('formView').classList.add('active');
-                const quiz = quizzes[this.state.currentQuiz];
-                let html = '';
+                this.hideAllViews(); document.getElementById('formView').classList.add('active');
+                const quiz = quizzes[this.state.currentQuiz]; let html = '';
                 quiz.formFields.forEach(field => {
                     let defaultValue = '';
                     if (field.key === 'nome' && this.state.userData.nome) defaultValue = this.state.userData.nome;
@@ -342,30 +352,20 @@
             },
 
             submitRespondentInfo() {
-                const quiz = quizzes[this.state.currentQuiz];
-                const info = {};
-                let valid = true;
+                const quiz = quizzes[this.state.currentQuiz]; const info = {}; let valid = true;
                 quiz.formFields.forEach(field => {
                     const input = document.getElementById(field.key);
                     if (input) {
                         const value = input.value.trim();
-                        if (field.required && !value) {
-                            alert(`Por favor, preencha: ${field.label}`);
-                            valid = false;
-                        }
+                        if (field.required && !value) { alert(`Por favor, preencha: ${field.label}`); valid = false; }
                         info[field.key] = value;
                     }
                 });
-                if (valid) {
-                    this.state.respondentInfo = info;
-                    this.showQuizView();
-                }
+                if (valid) { this.state.respondentInfo = info; this.showQuizView(); }
             },
 
-            showQuizView() {
-                this.hideAllViews();
-                document.getElementById('quizView').classList.add('active');
-                this.displayQuestion();
+            showQuizView() { 
+                this.hideAllViews(); document.getElementById('quizView').classList.add('active'); this.displayQuestion(); 
             },
 
             displayQuestion() {
@@ -374,17 +374,12 @@
                 const question = section.questions[this.state.currentQuestion];
                 const totalQuestions = quiz.sections.reduce((acc, s) => acc + s.questions.length, 0);
                 const currentQuestionNumber = quiz.sections.slice(0, this.state.currentSection).reduce((acc, s) => acc + s.questions.length, 0) + this.state.currentQuestion + 1;
-                const progress = (currentQuestionNumber / (totalQuestions + quiz.openQuestions.length)) * 100;
-
-                document.getElementById('progressFill').style.width = progress + '%';
-                document.getElementById('questionNumber').textContent = `Pergunta ${currentQuestionNumber} de ${totalQuestions + quiz.openQuestions.length}`;
+                document.getElementById('progressFill').style.width = (currentQuestionNumber / totalQuestions) * 100 + '%';
+                document.getElementById('questionNumber').textContent = `Pergunta ${currentQuestionNumber} de ${totalQuestions}`;
                 document.getElementById('sectionTitle').textContent = section.name;
                 document.getElementById('questionText').textContent = question;
-
                 let optionsHtml = '';
-                quiz.options.forEach(option => {
-                    optionsHtml += `<button class="option-btn" onclick="app.selectOption('${option}')">${option}</button>`;
-                });
+                quiz.options.forEach(option => { optionsHtml += `<button class="option-btn" onclick="app.selectOption('${option}')">${option}</button>`; });
                 document.getElementById('optionsContainer').innerHTML = optionsHtml;
             },
 
@@ -392,42 +387,28 @@
                 this.state.responses.push(option);
                 const quiz = quizzes[this.state.currentQuiz];
                 const section = quiz.sections[this.state.currentSection];
-
                 if (this.state.currentQuestion + 1 >= section.questions.length) {
                     if (this.state.currentSection + 1 < quiz.sections.length) {
-                        this.state.currentSection++;
-                        this.state.currentQuestion = 0;
-                        this.displayQuestion();
+                        this.state.currentSection++; this.state.currentQuestion = 0; this.displayQuestion();
                     } else {
-                        this.state.currentQuestion = 0;
-                        this.showOpenQuestions();
+                        this.state.currentQuestion = 0; this.showOpenQuestions();
                     }
                 } else {
-                    this.state.currentQuestion++;
-                    this.displayQuestion();
+                    this.state.currentQuestion++; this.displayQuestion();
                 }
             },
 
             showOpenQuestions() {
                 const quiz = quizzes[this.state.currentQuiz];
-                if (!quiz.openQuestions || quiz.openQuestions.length === 0) {
-                    this.finishQuiz();
-                    return;
-                }
-
-                this.hideAllViews();
-                document.getElementById('quizView').classList.add('active');
-
+                if (!quiz.openQuestions || quiz.openQuestions.length === 0) { this.finishQuiz(); return; }
+                this.hideAllViews(); document.getElementById('quizView').classList.add('active');
                 const totalMultiChoice = quiz.sections.reduce((acc, s) => acc + s.questions.length, 0);
                 const totalQuestions = totalMultiChoice + quiz.openQuestions.length;
                 const currentQuestionNumber = totalMultiChoice + this.state.currentQuestion + 1;
-                const progress = (currentQuestionNumber / totalQuestions) * 100;
-
-                document.getElementById('progressFill').style.width = progress + '%';
+                document.getElementById('progressFill').style.width = (currentQuestionNumber / totalQuestions) * 100 + '%';
                 document.getElementById('questionNumber').textContent = `Pergunta Aberta ${this.state.currentQuestion + 1} de ${quiz.openQuestions.length}`;
                 document.getElementById('sectionTitle').textContent = 'Perguntas Adicionais';
                 document.getElementById('questionText').textContent = quiz.openQuestions[this.state.currentQuestion];
-
                 const btnText = this.state.currentQuestion + 1 === quiz.openQuestions.length ? 'Finalizar' : 'Próxima';
                 document.getElementById('optionsContainer').innerHTML = `<div class="open-question"><textarea id="openAnswer" placeholder="Escreva sua resposta aqui..."></textarea><div class="button-group" style="margin-top: 20px;"><button class="btn-primary" onclick="app.submitOpenAnswer()">${btnText}</button></div></div>`;
                 document.getElementById('openAnswer').focus();
@@ -439,45 +420,68 @@
                 this.state.currentQuestion++;
                 if (this.state.currentQuestion >= quizzes[this.state.currentQuiz].openQuestions.length) {
                     this.finishQuiz();
-                } else {
-                    this.showOpenQuestions();
-                }
+                } else { this.showOpenQuestions(); }
             },
 
+            // ================================================================
+            // FUNÇÃO REATORADA - finishQuiz
+            // Aplica as novas regras de salvamento para cada tipo de usuário.
+            // ================================================================
             async finishQuiz() {
-                const responseData = {
-                    type: this.state.currentQuiz,
-                    title: quizzes[this.state.currentQuiz].title,
-                    respondentInfo: this.state.respondentInfo,
-                    responses: this.state.responses,
-                    timestamp: new Date().toLocaleDateString('pt-BR'),
-                    time: new Date().toLocaleTimeString('pt-BR'),
-                    usuario_uid: this.state.currentUser.uid,
-                    usuario_nome: this.state.userData.nome,
-                    usuario_tipo: this.state.userData.tipo
+                // Monta o objeto de resposta
+                const responseData = { 
+                    type: this.state.currentQuiz, 
+                    title: quizzes[this.state.currentQuiz].title, 
+                    respondentInfo: this.state.respondentInfo, 
+                    responses: this.state.responses, 
+                    timestamp: new Date().toLocaleDateString('pt-BR'), 
+                    time: new Date().toLocaleTimeString('pt-BR'), 
+                    usuario_uid: this.state.uid, 
+                    usuario_nome: this.state.userData.nome, 
+                    usuario_tipo: this.state.userData.tipo 
                 };
-
+                
+                // Salva os dados para a tela de resultado/download imediato
                 this.state.lastReportData = responseData;
 
                 try {
-                    await db.collection('respostas').add(responseData);
-                    await this.loadMyResponses();
+                    if (this.state.userData.tipo === 'familia') {
+                        // **REGRA FAMÍLIA**: Salva usando o UID como ID do documento.
+                        // Isso garante que a família só possa responder UMA VEZ,
+                        // pois a próxima tentativa irá sobrescrever (set) esta.
+                        await db.collection('respostas').doc(this.state.uid).set(responseData);
+                        
+                        // Adiciona o ID ao 'lastReportData' para o download funcionar
+                        this.state.lastReportData.id = this.state.uid;
+                    } else {
+                        // **REGRA ADM, PROFESSOR, AEE**: Salva com um ID automático.
+                        // Isso permite que eles respondam VÁRIAS VEZES,
+                        // pois cada resposta será um novo documento.
+                        const docRef = await db.collection('respostas').add(responseData);
+
+                        // Adiciona o ID gerado ao 'lastReportData' para o download funcionar
+                        this.state.lastReportData.id = docRef.id;
+                    }
+                    
+                    // Mostra a tela de sucesso
                     this.showResultsView(responseData);
+
                 } catch (error) {
-                    alert("Erro ao salvar: " + error.message);
+                    alert("Erro ao salvar sua resposta: " + error.message); 
+                    console.error("Erro ao salvar no Firestore: ", error);
                 }
             },
+            // ================================================================
+            // FIM DA FUNÇÃO REATORADA
+            // ================================================================
 
             showResultsView(responseData) {
-                this.hideAllViews();
-                document.getElementById('resultsView').classList.add('active');
+                this.hideAllViews(); document.getElementById('resultsView').classList.add('active');
                 const quiz = quizzes[responseData.type];
                 const totalQuestionsMult = quiz.sections.reduce((acc, s) => acc + s.questions.length, 0);
                 const positiveCount = responseData.responses.slice(0, totalQuestionsMult).filter(r => r === 'Sempre' || r === 'Sim').length;
                 const percentage = totalQuestionsMult > 0 ? Math.round((positiveCount / totalQuestionsMult) * 100) : 0;
-
                 document.getElementById('percentageDisplay').textContent = percentage + '%';
-
                 let parecer = '';
                 if (percentage >= 75) parecer = '✅ Excelente desempenho! Continue mantendo as práticas bem-sucedidas.';
                 else if (percentage >= 50) parecer = '📋 Desempenho satisfatório. Identifique pontos de melhoria e desenvolva ações.';
@@ -485,134 +489,135 @@
                 document.getElementById('parecer').textContent = parecer;
             },
 
-            downloadReport() {
-                this.generateReport(this.state.lastReportData);
+            downloadReport() { 
+                // A função generateReport agora precisa do .id que foi adicionado em finishQuiz
+                this.generateReport(this.state.lastReportData); 
             },
 
-            backToMenu() {
-                this.hideAllViews();
-                document.getElementById('menuView').classList.add('active');
-                this.setupDashboard();
+            backToMenu() { 
+                this.hideAllViews(); document.getElementById('menuView').classList.add('active'); this.setupDashboardView(); 
             },
 
-            hideAllViews() {
-                document.querySelectorAll('.view').forEach(view => view.classList.remove('active'));
+            hideAllViews() { 
+                document.querySelectorAll('.view').forEach(view => { view.classList.remove('active'); }); 
             },
 
-            async displayAllResponses() {
-                document.getElementById('responsesContainer').style.display = 'block';
-                const container = document.getElementById('responsesContainer');
-                const querySnapshot = await db.collection('respostas').get();
+           async displayResponses() {
+            if (this.state.userData.tipo !== 'ADM') { 
+                document.getElementById('responsesContainer').style.display = 'none'; 
+                return; 
+            }
+            document.getElementById('responsesContainer').style.display = 'block';
+            const container = document.getElementById('responsesContainer');
+            
+            // --- INÍCIO DO BLOCO DE DIAGNÓSTICO ---
+            try {
+                const querySnapshot = await db.collection('respostas').orderBy('timestamp', 'desc').orderBy('time', 'desc').get();
+                
                 this.state.allResponses = [];
-                querySnapshot.forEach(doc => {
-                    this.state.allResponses.push({ id: doc.id, ...doc.data() });
-                });
-
-                if (this.state.allResponses.length === 0) {
-                    container.innerHTML = '<p style="text-align:center; color:white; margin-top: 30px;">Nenhuma resposta coletada ainda.</p>';
-                    return;
+                querySnapshot.forEach(doc => { this.state.allResponses.push({ id: doc.id, ...doc.data() }); });
+                
+                if (this.state.allResponses.length === 0) { 
+                    container.innerHTML = '<p style="text-align:center; color:white; margin-top: 30px;">Nenhuma resposta coletada ainda.</p>'; 
+                    return; 
                 }
-
-                let html = `<div class="results-container"><div class="results-header"><h3>📊 Respostas Coletadas (${this.state.allResponses.length})</h3><button class="btn-chart" onclick="app.showOverallCharts()">Ver Gráficos</button></div>`;
-
+                
+                let html = `<div class="results-container"><div class="results-header"><h3>📊 Respostas Coletadas (${this.state.allResponses.length})</h3><button class="btn-chart" onclick="app.showOverallCharts()">Ver Gráficos Gerais</button></div>`;
+                
                 this.state.allResponses.forEach(response => {
-                    const quiz = quizzes[response.type];
-                    if (!quiz) return;
+                    const quiz = quizzes[response.type]; if (!quiz) return;
                     const totalQuestionsMult = quiz.sections.reduce((acc, s) => acc + s.questions.length, 0);
                     const positiveCount = response.responses.slice(0, totalQuestionsMult).filter(r => r === 'Sempre' || r === 'Sim').length;
                     const percentage = totalQuestionsMult > 0 ? Math.round((positiveCount / totalQuestionsMult) * 100) : 0;
-
-                    html += `<div class="response-item"><div><p><strong>${response.type.toUpperCase()}</strong> - ${percentage}%</p><p style="font-size: 0.9rem; color: #666;">${response.respondentInfo.nome || response.usuario_nome}</p><p style="font-size: 0.85rem; color: #999;">${response.timestamp}</p></div><div class="response-actions"><button class="btn-small btn-download" onclick="app.downloadSingleReport('${response.id}')">⬇️ Baixar</button><button class="btn-small btn-delete" onclick="app.deleteResponse('${response.id}')">🗑️ Deletar</button></div></div>`;
+                    
+                    let respondentName = response.respondentInfo.nome || response.usuario_nome;
+                    if (response.respondentInfo.aluno) {
+                        respondentName += ` (Aluno: ${response.respondentInfo.aluno})`;
+                    }
+                    
+                    html += `<div class="response-item"><div><p><strong>${response.type.toUpperCase()}</strong> - ${percentage}%</p><p style="font-size: 0.9rem; color: #666;">${respondentName}</p><p style="font-size: 0.85rem; color: #999;">${response.timestamp} às ${response.time || ''}</p></div><div class="response-actions"><button class="btn-small btn-download" onclick="app.downloadSingleReport('${response.id}')">⬇️ Baixar</button><button class="btn-small btn-delete" onclick="app.deleteResponse('${response.id}')">🗑️ Deletar</button></div></div>`;
                 });
-
                 container.innerHTML = html + `</div>`;
-            },
 
-            downloadSingleReport(id) {
-                const response = this.state.allResponses.find(r => r.id === id);
-                if (response) this.generateReport(response);
+            } catch (error) {
+                // SE AS REGRAS FALHAREM, ESTE ALERTA VAI APARECER!
+                alert("ERRO DE DIAGNÓSTICO (ADM): Não foi possível carregar as respostas. Verifique as regras do Firestore. Erro: " + error.message);
+                console.error("Erro ao buscar respostas (ADM):", error);
+                container.innerHTML = `<p style="text-align:center; color:yellow; margin-top: 30px;">Erro ao carregar respostas: ${error.message}</p>`;
+            }
+            // --- FIM DO BLOCO DE DIAGNÓSTICO ---
+        },
+
+            downloadSingleReport(id) { 
+                const response = this.state.allResponses.find(r => r.id === id); 
+                if (response) { this.generateReport(response); } else { alert("Erro: Relatório não encontrado."); } 
             },
 
             generateReport(response) {
                 if (!response) return;
-                const quiz = quizzes[response.type];
-                let allQuestions = [];
-                quiz.sections.forEach(section => {
-                    allQuestions = allQuestions.concat(section.questions);
-                });
-
+                const quiz = quizzes[response.type]; let allQuestions = [];
+                quiz.sections.forEach(section => { allQuestions = allQuestions.concat(section.questions); });
                 const totalQuestionsMult = allQuestions.length;
                 const responsesMulti = response.responses.slice(0, totalQuestionsMult);
                 const responsesOpen = response.responses.slice(totalQuestionsMult);
                 const positiveCount = responsesMulti.filter(r => r === 'Sempre' || r === 'Sim').length;
                 const percentage = totalQuestionsMult > 0 ? Math.round((positiveCount / totalQuestionsMult) * 100) : 0;
-
-                let report = `RELATÓRIO DE AVALIAÇÃO AEE\n================================\n\nTipo: ${response.title}\nData: ${response.timestamp} - ${response.time}\n\nRESPONDENTE:\n`;
-                Object.entries(response.respondentInfo).forEach(([key, value]) => {
-                    const label = quiz.formFields.find(f => f.key === key)?.label || key;
-                    report += `${label}: ${value || 'Não informado'}\n`;
-                });
-
+                let report = `RELATÓRIO DE AVALIAÇÃO AEE\n================================\n\nTipo de Questionário: ${response.title}\nData: ${response.timestamp} - ${response.time}\n\nRESPONDENTE:\n`;
+                Object.entries(response.respondentInfo).forEach(([key, value]) => { const label = quiz.formFields.find(f => f.key === key)?.label || key; report += `${label}: ${value || 'Não informado'}\n`; });
                 report += `\n================================\nRESPOSTAS (MÚLTIPLA ESCOLHA):\n\n`;
-                responsesMulti.forEach((ans, idx) => {
-                    report += `P${idx + 1}. ${allQuestions[idx]}\n   R: ${ans}\n\n`;
-                });
-
+                responsesMulti.forEach((ans, idx) => { report += `P${idx + 1}. ${allQuestions[idx]}\n   R: ${ans}\n\n`; });
                 if (responsesOpen.length > 0 && quiz.openQuestions.length > 0) {
                     report += `================================\nRESPOSTAS (ABERTAS):\n\n`;
-                    quiz.openQuestions.forEach((question, idx) => {
-                        report += `P${idx + 1}. ${question}\n   R: ${responsesOpen[idx] || '[Sem resposta]'}\n\n`;
-                    });
+                    quiz.openQuestions.forEach((question, idx) => { report += `P${idx + 1}. ${question}\n   R: ${responsesOpen[idx] || '[Sem resposta]'}\n\n`; });
                 }
-
                 report += `================================\nPARECER:\n\nTaxa de Respostas Positivas: ${percentage}%\n`;
-                if (percentage >= 75) report += `Status: EXCELENTE\n`;
-                else if (percentage >= 50) report += `Status: SATISFATÓRIO\n`;
-                else report += `Status: PRECISA MELHORAR\n`;
-
+                if (percentage >= 75) report += `Status: EXCELENTE\nParecer: Continue mantendo as práticas bem-sucedidas!\n`;
+                else if (percentage >= 50) report += `Status: SATISFATÓRIO\nParecer: Identifique pontos de melhoria e desenvolva ações.\n`;
+                else report += `Status: PRECISA MELHORAR\nParecer: Recomenda-se apoio e planejamento de intervenções.\n`;
                 const blob = new Blob([report], { type: 'text/plain;charset=utf-8' });
-                const url = URL.createObjectURL(blob);
-                const element = document.createElement('a');
-                element.href = url;
-                element.download = `relatorio_aee_${response.id || Date.now()}.txt`;
-                document.body.appendChild(element);
-                element.click();
-                document.body.removeChild(element);
-                URL.revokeObjectURL(url);
+                const url = URL.createObjectURL(blob); const element = document.createElement('a');
+                element.href = url; 
+                // Usa o ID do documento para garantir um nome de arquivo único
+                element.download = `relatorio_aee_${response.id || 'recente'}.txt`;
+                document.body.appendChild(element); element.click(); document.body.removeChild(element); URL.revokeObjectURL(url);
             },
 
             async deleteResponse(id) {
-                if (confirm('Deletar esta resposta?')) {
+                if (confirm('Tem certeza que deseja deletar esta resposta? Esta ação não pode ser desfeita.')) {
                     try {
                         await db.collection('respostas').doc(id).delete();
-                        await this.displayAllResponses();
-                    } catch (error) {
-                        alert("Erro ao deletar: " + error.message);
-                    }
+                        alert("Resposta deletada com sucesso."); 
+                        // Recarrega a lista de respostas
+                        this.displayResponses();
+                    } catch (error) { alert("Erro ao deletar: " + error.message); }
                 }
             },
 
-            showOverallCharts() {
-                Object.values(this.state.chartInstances).forEach(chart => chart.destroy());
-                this.state.chartInstances = {};
+            openChartModal() { 
+                document.getElementById('chartModal').style.display = 'block'; 
+            },
 
+            closeChartModal() { 
+                document.getElementById('chartModal').style.display = 'none'; 
+            },
+
+            showOverallCharts() {
+                Object.values(this.state.chartInstances).forEach(chart => chart.destroy()); this.state.chartInstances = {};
                 const data = this.aggregateChartData();
                 if (Object.keys(data.aee).length > 0) this.createChart('aeeChart', 'AEE', data.aee, ['#667eea', '#764ba2', '#8e44ad', '#3498db']);
                 if (Object.keys(data.familia).length > 0) this.createChart('familiaChart', 'Família', data.familia, ['#2ecc71', '#f1c40f', '#e74c3c']);
                 if (Object.keys(data.professor).length > 0) this.createChart('professorChart', 'Professor', data.professor, ['#667eea', '#764ba2', '#8e44ad', '#3498db']);
-
-                document.getElementById('chartModal').style.display = 'block';
+                this.openChartModal();
             },
 
             aggregateChartData() {
                 const chartData = { aee: {}, familia: {}, professor: {} };
                 this.state.allResponses.forEach(response => {
-                    const quiz = quizzes[response.type];
-                    if (!quiz) return;
+                    const quiz = quizzes[response.type]; if (!quiz) return;
                     const totalQuestionsMult = quiz.sections.reduce((acc, s) => acc + s.questions.length, 0);
                     const multiChoiceResponses = response.responses.slice(0, totalQuestionsMult);
                     multiChoiceResponses.forEach(answer => {
-                        if (!chartData[response.type][answer]) chartData[response.type][answer] = 0;
+                        if (!chartData[response.type][answer]) { chartData[response.type][answer] = 0; }
                         chartData[response.type][answer]++;
                     });
                 });
@@ -623,33 +628,13 @@
                 const ctx = document.getElementById(canvasId).getContext('2d');
                 this.state.chartInstances[canvasId] = new Chart(ctx, {
                     type: 'bar',
-                    data: {
-                        labels: Object.keys(data),
-                        datasets: [{
-                            label: `Contagem - ${label}`,
-                            data: Object.values(data),
-                            backgroundColor: backgroundColors,
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } },
-                        plugins: { legend: { display: false } }
-                    }
-                });
-            },
-
-            closeChartModal() {
-                document.getElementById('chartModal').style.display = 'none';
-            },
-
-            logout() {
-                auth.signOut().then(() => {
-                    window.location.href = 'index.html';
+                    data: { labels: Object.keys(data), datasets: [{ label: `Contagem - ${label}`, data: Object.values(data), backgroundColor: backgroundColors, borderWidth: 1 }] },
+                    options: { scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }, plugins: { legend: { display: false } } }
                 });
             }
-        };
+        }; // Fim do objeto 'app'
 
+        // 4. PONTO DE ENTRADA DA APLICAÇÃO
         document.addEventListener('DOMContentLoaded', () => {
             app.init();
         });
