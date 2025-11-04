@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema - Autoavaliação Reflexiva </title>
+    <title>Sistema - Autoavaliação e Avaliação Reflexiva </title>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -105,7 +105,7 @@
     <div class="container">
         <div class="view active" id="menuView">
             <div class="header">
-                <h1>🎓 Sistema de Autoavaliação Reflexiva</h1>
+                <h1>🎓 Sistema de Autoavaliação e Avaliação Reflexiva</h1>
                 <p id="welcomeMessage">Carregando...</p>
                 <button class="btn-logout" onclick="app.logout()">Sair</button>
             </div>
@@ -113,7 +113,7 @@
             <div class="quiz-grid" id="quiz-grid">
                 <div class="quiz-card" id="card-aee">
                     <h2>👨‍🏫</h2><h2>AEE</h2>
-                    <p>Autoavaliação Reflexiva sobre o Atendimento</p>
+                    <p>Avaliação Reflexiva sobre o Atendimento</p>
                     <button onclick="app.startQuiz('aee')">Iniciar</button>
                 </div>
                 <div class="quiz-card" id="card-familia">
@@ -202,7 +202,7 @@
         // 2. O OBJETO 'quizzes'
         const quizzes = {
             aee: {
-                title: 'Autoavaliação Reflexiva sobre o Atendimento no AEE',
+                title: 'Autoavaliação e Avaliação Reflexiva sobre o Atendimento no AEE',
                 sections: [{name: 'Reflexão sobre a Prática', questions: ['Tenho clareza dos objetivos do atendimento que realizo com cada aluno (a)?','Adoto estratégias diversificadas para respeitar as singularidades e promover a inclusão de cada aluno (a)?','Promovo um espaço seguro, afetivo e acolhedor durante o AEE?','Tenho escutado as necessidades dos alunos (as) de forma atenta e sensível?','Registro com consistência e qualidade o desenvolvimento dos alunos (as)?']},{name: 'Diálogo com a Família', questions: ['Estabeleço uma comunicação contínua e respeitosa com as famílias?','Escuto e valorizo a história de vida e os saberes que a família compartilha sobre o estudante?','Envolvo a família no processo de construção das estratégias do AEE?']},{name: 'Olhar para Si', questions: ['Reconheço minhas limitações e busco apoio quando necessário?','Cuido da minha energia e bem-estar para estar inteira(o) no atendimento?','Sinto que estou cumprindo meu propósito no AEE?']}],
                 options: ['Sempre', 'Às vezes', 'Raramente', 'Nunca'],
                 openQuestions: ['O que tem funcionado bem nos meus atendimentos no AEE?','O que pode ser aprimorado? Que ações posso tomar para isso?'],
